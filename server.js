@@ -17,8 +17,9 @@ const storeConfig = {
   supportEmail: process.env.SUPPORT_EMAIL || "support@example.com",
   wallets: {
     BTC: process.env.BTC_ADDRESS || "bc1q-set-your-btc-address-in-env",
-    ETH: process.env.ETH_ADDRESS || "0x-set-your-eth-address-in-env",
+    USDT: process.env.USDT_ADDRESS || "0x-set-your-usdt-address-in-env",
     USDC: process.env.USDC_ADDRESS || "0x-set-your-usdc-address-in-env",
+    SOL: process.env.SOL_ADDRESS || "set-your-sol-address-in-env",
   },
 };
 

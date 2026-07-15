@@ -5,6 +5,14 @@ let CART = loadCart();
 let activeFilter = "all";
 let activeCoin = "BTC";
 
+// Coins accepted at checkout. `code` must match a key in the server's wallets config.
+const COINS = [
+  { code: "BTC", label: "Bitcoin", network: "" },
+  { code: "USDT", label: "Tether", network: "ERC-20" },
+  { code: "USDC", label: "USD Coin", network: "ERC-20" },
+  { code: "SOL", label: "Solana", network: "" },
+];
+
 const $ = (s) => document.querySelector(s);
 const money = (n) =>
   "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -138,6 +146,12 @@ function renderCheckout() {
   const items = cartEntries();
   const total = cartTotal();
   const addr = (CONFIG.wallets && CONFIG.wallets[activeCoin]) || "address-not-configured";
+  const coinObj = COINS.find((c) => c.code === activeCoin) || {};
+  const netNote = coinObj.network
+    ? `${coinObj.label} on the ${coinObj.network} network only`
+    : activeCoin === "SOL"
+    ? "Solana network"
+    : coinObj.label || activeCoin;
   const content = $("#checkoutContent");
 
   content.innerHTML = `
@@ -145,15 +159,15 @@ function renderCheckout() {
     <p class="sub">Choose a coin, send the exact USD value in crypto, then confirm your order below.</p>
 
     <div class="coin-select" id="coinSelect">
-      ${["BTC", "ETH", "USDC"].map((c) => `
-        <div class="coin-opt ${c === activeCoin ? "active" : ""}" data-coin="${c}">
-          ${c}<small>${c === "BTC" ? "Bitcoin" : c === "ETH" ? "Ethereum" : "USD Coin"}</small>
+      ${COINS.map((c) => `
+        <div class="coin-opt ${c.code === activeCoin ? "active" : ""}" data-coin="${c.code}">
+          ${c.code}<small>${c.label}${c.network ? " · " + c.network : ""}</small>
         </div>`).join("")}
     </div>
 
     <div class="pay-box">
       <div class="pay-amount">${money(total)}</div>
-      <small class="note">Send the equivalent in ${activeCoin} to:</small>
+      <small class="note">Send the equivalent in <strong>${activeCoin}</strong> — ${netNote} — to:</small>
       <img src="${qrURL(addr)}" alt="Payment QR code" />
       <div class="pay-addr" id="payAddr">${addr}</div>
       <button class="copy-btn" id="copyAddr">Copy address</button>
