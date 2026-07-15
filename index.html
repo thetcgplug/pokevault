@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PokéVault — Sealed Product & Graded Slabs</title>
+  <meta name="description" content="Premium sealed Pokémon product and graded slabs. Authenticated, climate-controlled, crypto checkout." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="#top">
+        <span class="brand-mark">◆</span>
+        <span class="brand-name" data-store-name>PokéVault</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#shop">Shop</a>
+        <a href="#sealed">Sealed</a>
+        <a href="#slabs">Graded Slabs</a>
+        <a href="#trust">Why Us</a>
+      </nav>
+      <button class="cart-btn" id="cartBtn" aria-label="Open cart">
+        Cart <span class="cart-count" id="cartCount">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-glow"></div>
+      <div class="hero-content">
+        <span class="eyebrow">Authenticated · Climate-controlled · Crypto-native</span>
+        <h1>Sealed grails &amp; graded slabs,<br /><span class="grad">vaulted and verified.</span></h1>
+        <p class="hero-sub">A curated marketplace for serious Pokémon collectors. Factory-sealed boxes and professionally graded cards — shipped fully insured. Pay in BTC, ETH, or USDC.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#shop">Browse the vault</a>
+          <a class="btn btn-ghost" href="#trust">How it works</a>
+        </div>
+        <div class="hero-stats">
+          <div><strong id="statCount">—</strong><span>listings live</span></div>
+          <div><strong>100%</strong><span>authenticated</span></div>
+          <div><strong>3</strong><span>coins accepted</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="shop" id="shop">
+      <div class="shop-head">
+        <h2>The Vault</h2>
+        <div class="filters" id="filters">
+          <button class="chip active" data-filter="all">All</button>
+          <button class="chip" data-filter="sealed">Sealed</button>
+          <button class="chip" data-filter="slab">Graded Slabs</button>
+        </div>
+      </div>
+      <div class="grid" id="productGrid"></div>
+    </section>
+
+    <section class="trust" id="trust">
+      <h2>Why collectors buy from us</h2>
+      <div class="trust-grid">
+        <div class="trust-card">
+          <span class="trust-ico">🛡️</span>
+          <h3>Every item authenticated</h3>
+          <p>Slabs come straight from PSA and CGC. Sealed product is verified case-fresh — never searched, weighed, or resealed.</p>
+        </div>
+        <div class="trust-card">
+          <span class="trust-ico">❄️</span>
+          <h3>Vault-stored</h3>
+          <p>Inventory is kept in a smoke-free, climate-controlled environment to protect condition and value.</p>
+        </div>
+        <div class="trust-card">
+          <span class="trust-ico">📦</span>
+          <h3>Insured shipping</h3>
+          <p>Fully insured, tracked, and discreetly packaged. High-value slabs ship signature-required.</p>
+        </div>
+        <div class="trust-card">
+          <span class="trust-ico">₿</span>
+          <h3>Crypto checkout</h3>
+          <p>Pay in Bitcoin, Ethereum, or USDC. Fast, borderless, and secure — no card fees.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="brand"><span class="brand-mark">◆</span> <span data-store-name>PokéVault</span></span>
+      <p>Questions? <a id="footerEmail" href="#">Contact us</a></p>
+      <small>© <span id="year"></span> PokéVault. Prices in USD; settle in crypto at checkout. Not affiliated with Nintendo, Game Freak, or The Pokémon Company.</small>
+    </div>
+  </footer>
+
+  <!-- Cart drawer -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <aside class="drawer" id="cartDrawer" aria-label="Shopping cart">
+    <div class="drawer-head">
+      <h3>Your cart</h3>
+      <button class="icon-btn" id="closeCart" aria-label="Close cart">✕</button>
+    </div>
+    <div class="drawer-body" id="cartItems"></div>
+    <div class="drawer-foot">
+      <div class="cart-total"><span>Total</span><strong id="cartTotal">$0.00</strong></div>
+      <button class="btn btn-primary btn-block" id="checkoutBtn" disabled>Checkout with crypto</button>
+    </div>
+  </aside>
+
+  <!-- Checkout modal -->
+  <div class="modal-overlay" id="checkoutOverlay">
+    <div class="modal" id="checkoutModal" role="dialog" aria-modal="true">
+      <button class="icon-btn modal-close" id="closeCheckout" aria-label="Close">✕</button>
+      <div id="checkoutContent"></div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

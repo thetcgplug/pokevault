@@ -1,0 +1,14 @@
+{
+  "name": "pokevault",
+  "version": "1.0.0",
+  "description": "PokéVault — a modern storefront for reselling sealed Pokémon products and graded slabs, with crypto checkout.",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}
