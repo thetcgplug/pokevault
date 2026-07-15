@@ -60,12 +60,16 @@ function renderProducts() {
 function cardHTML(p) {
   const badge = p.category === "slab" ? "Graded Slab" : "Sealed";
   const stockTxt = p.stock <= 2 ? `Only ${p.stock} left` : "In stock";
+  // If a real photo URL is provided on the product, use it; otherwise render designed art.
+  const art = p.image
+    ? `<img class="card-photo" src="${p.image}" alt="${p.name}" loading="lazy" />`
+    : productArt(p);
   return `
     <article class="card">
-      <div class="card-art" style="background: radial-gradient(120% 120% at 50% 0%, ${p.accent}33, transparent 70%);">
+      <div class="card-art" style="background: radial-gradient(130% 130% at 50% 0%, ${p.accent}2e, #0d0f18 72%);">
         <span class="card-badge">${badge}</span>
         <span class="card-stock">${stockTxt}</span>
-        <span>${p.emoji}</span>
+        ${art}
       </div>
       <div class="card-body">
         <span class="card-set">${p.set}</span>
@@ -77,6 +81,64 @@ function cardHTML(p) {
         </div>
       </div>
     </article>`;
+}
+
+// ---------- Designed product art (no external images / no copyright issues) ----------
+function gradeLabel(p) {
+  const m = (p.condition || "").match(/^(PSA|CGC|BGS|SGC)\s*[0-9.]+/i);
+  return m ? m[0].toUpperCase() : "GRADED";
+}
+function setInitials(p) {
+  const core = (p.set || "").replace(/\(.*?\)/g, "").replace(/[:#].*$/, "");
+  const words = core.split(/[\s&]+/).filter((w) => /[A-Za-z0-9]/.test(w));
+  const letters = words.map((w) => w[0]).join("").toUpperCase().slice(0, 4);
+  return letters || "TCG";
+}
+function pokeball(cx, cy, r, stroke) {
+  return `
+    <g opacity="0.9">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${stroke}" stroke-width="2"/>
+      <path d="M ${cx - r} ${cy} H ${cx + r}" stroke="${stroke}" stroke-width="2"/>
+      <circle cx="${cx}" cy="${cy}" r="${r * 0.28}" fill="#0d0f18" stroke="${stroke}" stroke-width="2"/>
+    </g>`;
+}
+
+function productArt(p) {
+  const a = p.accent || "#7b61ff";
+  if (p.category === "slab") {
+    // Graded card slab
+    return `
+    <svg class="card-svg" viewBox="0 0 240 175" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="g-${p.id}" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="${a}"/>
+          <stop offset="1" stop-color="#0d0f18"/>
+        </linearGradient>
+      </defs>
+      <rect x="72" y="16" width="96" height="143" rx="10" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.18)"/>
+      <rect x="80" y="24" width="80" height="26" rx="5" fill="${a}"/>
+      <text x="120" y="41" text-anchor="middle" font-family="Sora, sans-serif" font-weight="800" font-size="13" fill="#0d0f18">${gradeLabel(p)}</text>
+      <rect x="80" y="56" width="80" height="95" rx="6" fill="url(#g-${p.id})" stroke="rgba(255,255,255,0.22)"/>
+      <text x="120" y="112" text-anchor="middle" font-size="40">${p.emoji || "★"}</text>
+      ${pokeball(120, 132, 11, "rgba(255,255,255,0.85)")}
+    </svg>`;
+  }
+  // Sealed box / ETB
+  return `
+    <svg class="card-svg" viewBox="0 0 240 175" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="g-${p.id}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="${a}"/>
+          <stop offset="1" stop-color="#0d0f18"/>
+        </linearGradient>
+      </defs>
+      <rect x="66" y="30" width="108" height="118" rx="9" fill="url(#g-${p.id})" stroke="rgba(255,255,255,0.22)"/>
+      <rect x="66" y="30" width="108" height="24" rx="9" fill="rgba(255,255,255,0.14)"/>
+      <path d="M66 92 h108" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" stroke-dasharray="4 4"/>
+      <text x="120" y="80" text-anchor="middle" font-family="Sora, sans-serif" font-weight="800" font-size="22" fill="#fff" opacity="0.95">${setInitials(p)}</text>
+      <text x="120" y="120" text-anchor="middle" font-size="30">${p.emoji || "📦"}</text>
+      ${pokeball(120, 138, 10, "rgba(255,255,255,0.8)")}
+    </svg>`;
 }
 
 // ---------- Cart ----------
