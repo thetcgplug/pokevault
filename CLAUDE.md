@@ -51,6 +51,10 @@ pokevault/
 ├─ styles.css       # All the styling (dark theme, layout, cards).
 ├─ app.js           # Browser code: loads products, cart, checkout, and the SVG product art.
 ├─ products.json    # YOUR INVENTORY. Edit this to add/remove/price products.
+├─ images/          # YOUR PRODUCT PHOTOS. Drop <product-id>.jpg here → auto-shows on the site.
+├─ favicon.svg      # Browser-tab icon (brand diamond mark). Served at /favicon.svg.
+├─ og.png           # Social-share preview image (1200×630). This is what link previews use.
+├─ og.svg           # Editable source for og.png (regenerate the PNG if you tweak this).
 ├─ package.json     # Tells Node how to start the app ("npm start" → node server.js).
 ├─ .env.example     # A template listing the settings the app expects (no real secrets).
 ├─ .gitignore       # Files Git should ignore (node_modules, .env, orders.log).
@@ -59,9 +63,9 @@ pokevault/
 └─ DOMAIN-SETUP.md  # Notes on the custom-domain DNS setup.
 ```
 
-There are no `public/` or `data/` subfolders — everything sits at the root. `server.js` only
-serves `index.html`, `styles.css`, and `app.js` as static files (so source files and logs
-stay private).
+The only subfolder is `images/` (your product photos). Everything else sits at the root.
+`server.js` serves `index.html`, `styles.css`, `app.js`, `favicon.svg`, `og.png`, `og.svg`,
+and any file inside `images/` as static assets (all other source files and logs stay private).
 
 ---
 
@@ -129,6 +133,27 @@ Notes for a beginner:
   slabs, high-end grails, etc.) with stock levels.
 - ✅ Designed **SVG product graphics** (distinct sealed-box vs graded-slab art) generated in
   `app.js` — no external images, so nothing can break or raise copyright issues.
+- ✅ **Drop-in product photos.** Save a photo named `<product-id>.jpg` (or .png/.webp) into
+  the `images/` folder and it automatically replaces that product's SVG art on both the card
+  and the detail modal — no code or `products.json` edits. Server exposes `/api/images` and
+  serves `/images/<file>`. See `images/README.md`. Products without a photo keep the SVG.
+- ✅ **Card images for 24 of the 27 graded slabs**, auto-matched to the free Pokémon TCG API
+  (`pokemontcg.io`) and compressed to web JPEGs in `images/`. ⚠️ These are the **bare card
+  face**, not a photo of your actual slab-in-case, and the artwork is **© The Pokémon Company**
+  (pokemontcg.io just hosts it) — fine as a placeholder, but photographing your real slabs is
+  cleaner and more trustworthy, especially on the high-value cards. Still needing an image
+  (not in the API): `pikachu-illustrator-psa7`, `trophy-pikachu-no3-psa9`,
+  `mega-dragonite-ex-mar-psa10`, plus all 21 sealed products — use your own photos for those.
+- ✅ **Product detail modal** — clicking any card opens a popup showing the full product
+  `description`, larger art, condition, price, and an add-to-cart button.
+- ✅ **Search box** — filters the grid live by name, set, condition, or description (works
+  alongside the All/Sealed/Slabs category chips). Shows a "no results" message when empty.
+- ✅ **Sold-out handling** — products with `stock: 0` show a red "Sold out" badge and a
+  disabled button instead of silently doing nothing.
+- ✅ **"How it works" FAQ section** — accordion answering the common crypto-payment,
+  shipping, authenticity, and refund questions.
+- ✅ **SEO + social sharing** — Open Graph/Twitter meta tags, canonical URL, `theme-color`,
+  a `favicon.svg` tab icon, and an `og.svg` link-preview image.
 - ✅ Deployed on Railway with auto-deploy from GitHub `main`.
 - ✅ Wallet addresses + support email configured in Railway.
 
@@ -144,9 +169,10 @@ Notes for a beginner:
 
 ## 9. Suggested next steps (roughly easiest → hardest)
 
-1. **Product photos.** `app.js` already supports an optional `"image": "https://..."` field on
-   any product in `products.json`. Add your own photos of your inventory and each card shows
-   the photo instead of the designed graphic. (Use your own photos, not scraped ones.)
+1. **Add your product photos.** The photo system is built (see section 7). Take pictures of
+   your own inventory and drop each one in `images/` named after the product's `id`
+   (e.g. `ascended-heroes-etb.jpg`). Use your own photos — never scraped/retailer/Google
+   images (copyright). This is the single biggest thing left for converting high-value buyers.
 2. **Set real prices.** The prices in `products.json` are sensible placeholders — update them
    to your actual asking prices.
 3. **`www` redirect.** Make `www.thetcgplug.org` redirect to the root domain (a free Cloudflare

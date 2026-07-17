@@ -1,9 +1,12 @@
 // ---------- State ----------
 let PRODUCTS = [];
 let CONFIG = { storeName: "PokéVault", supportEmail: "", wallets: {} };
+// Map of product id -> photo filename found in /images (e.g. "ascended-heroes-etb" -> "ascended-heroes-etb.jpg").
+let PHOTOS = {};
 let CART = loadCart();
 let activeFilter = "all";
 let activeCoin = "BTC";
+let searchQuery = "";
 
 // Coins accepted at checkout. `code` must match a key in the server's wallets config.
 const COINS = [
@@ -27,12 +30,20 @@ function saveCart() { localStorage.setItem("pv_cart", JSON.stringify(CART)); }
 async function init() {
   document.getElementById("year").textContent = new Date().getFullYear();
   try {
-    const [pRes, cRes] = await Promise.all([
+    const [pRes, cRes, iRes] = await Promise.all([
       fetch("/api/products"),
       fetch("/api/config"),
+      fetch("/api/images"),
     ]);
     PRODUCTS = await pRes.json();
     CONFIG = await cRes.json();
+    // Index available photos by product id (filename without extension).
+    const files = await iRes.json();
+    PHOTOS = {};
+    (Array.isArray(files) ? files : []).forEach((f) => {
+      const id = f.replace(/\.[^.]+$/, "");
+      if (!PHOTOS[id]) PHOTOS[id] = f;
+    });
   } catch (e) {
     console.error("Failed to load store data", e);
   }
@@ -48,10 +59,35 @@ async function init() {
 }
 
 // ---------- Products ----------
+// Photo source for a product: an explicit `image` URL wins, then a file dropped in /images,
+// otherwise null (caller falls back to the designed SVG art).
+function photoSrc(p) {
+  if (p.image) return p.image;
+  if (PHOTOS[p.id]) return "/images/" + PHOTOS[p.id];
+  return null;
+}
+
+function matchesSearch(p) {
+  if (!searchQuery) return true;
+  const hay = `${p.name} ${p.set} ${p.condition} ${p.description || ""}`.toLowerCase();
+  return searchQuery.split(/\s+/).every((term) => hay.includes(term));
+}
+
 function renderProducts() {
   const grid = document.getElementById("productGrid");
-  const list = PRODUCTS.filter((p) => activeFilter === "all" || p.category === activeFilter);
+  const list = PRODUCTS
+    .filter((p) => activeFilter === "all" || p.category === activeFilter)
+    .filter(matchesSearch);
   grid.innerHTML = list.map(cardHTML).join("");
+  document.getElementById("noResults").hidden = list.length > 0;
+
+  // Clicking a card (but not the add button) opens the product detail.
+  grid.querySelectorAll(".card").forEach((card) =>
+    card.addEventListener("click", (e) => {
+      if (e.target.closest(".add-btn")) return;
+      openDetail(card.dataset.id);
+    })
+  );
   grid.querySelectorAll(".add-btn").forEach((btn) =>
     btn.addEventListener("click", () => addToCart(btn.dataset.id))
   );
@@ -59,16 +95,21 @@ function renderProducts() {
 
 function cardHTML(p) {
   const badge = p.category === "slab" ? "Graded Slab" : "Sealed";
-  const stockTxt = p.stock <= 2 ? `Only ${p.stock} left` : "In stock";
-  // If a real photo URL is provided on the product, use it; otherwise render designed art.
-  const art = p.image
-    ? `<img class="card-photo" src="${p.image}" alt="${p.name}" loading="lazy" />`
+  const soldOut = p.stock <= 0;
+  const stockTxt = soldOut ? "Sold out" : p.stock <= 2 ? `Only ${p.stock} left` : "In stock";
+  // Use a real photo (explicit URL or a file in /images) if available; otherwise designed art.
+  const src = photoSrc(p);
+  const art = src
+    ? `<img class="card-photo" src="${src}" alt="${p.name}" loading="lazy" />`
     : productArt(p);
+  const btn = soldOut
+    ? `<button class="add-btn" disabled>Sold out</button>`
+    : `<button class="add-btn" data-id="${p.id}">Add to cart</button>`;
   return `
-    <article class="card">
+    <article class="card ${soldOut ? "sold-out" : ""}" data-id="${p.id}">
       <div class="card-art" style="background: radial-gradient(130% 130% at 50% 0%, ${p.accent}2e, #0d0f18 72%);">
         <span class="card-badge">${badge}</span>
-        <span class="card-stock">${stockTxt}</span>
+        <span class="card-stock ${soldOut ? "is-out" : ""}">${stockTxt}</span>
         ${art}
       </div>
       <div class="card-body">
@@ -77,7 +118,7 @@ function cardHTML(p) {
         <span class="card-cond">${p.condition}</span>
         <div class="card-foot">
           <span class="card-price">${money(p.price)}</span>
-          <button class="add-btn" data-id="${p.id}">Add to cart</button>
+          ${btn}
         </div>
       </div>
     </article>`;
@@ -199,6 +240,43 @@ function closeCart() { $("#cartDrawer").classList.remove("open"); $("#drawerOver
 function openCheckout() { renderCheckout(); $("#checkoutModal").classList.add("open"); $("#checkoutOverlay").classList.add("open"); }
 function closeCheckout() { $("#checkoutModal").classList.remove("open"); $("#checkoutOverlay").classList.remove("open"); }
 
+// ---------- Product detail ----------
+function openDetail(id) {
+  const p = PRODUCTS.find((x) => x.id === id);
+  if (!p) return;
+  const soldOut = p.stock <= 0;
+  const badge = p.category === "slab" ? "Graded Slab" : "Sealed";
+  const stockTxt = soldOut ? "Sold out" : p.stock <= 2 ? `Only ${p.stock} left` : "In stock";
+  const src = photoSrc(p);
+  const art = src
+    ? `<img class="card-photo" src="${src}" alt="${p.name}" loading="lazy" />`
+    : productArt(p);
+  const btn = soldOut
+    ? `<button class="btn btn-primary btn-block" disabled>Sold out</button>`
+    : `<button class="btn btn-primary btn-block" id="detailAdd" data-id="${p.id}">Add to cart · ${money(p.price)}</button>`;
+
+  $("#detailContent").innerHTML = `
+    <div class="detail-art" style="background: radial-gradient(130% 130% at 50% 0%, ${p.accent}2e, #0d0f18 72%);">${art}</div>
+    <div class="detail-info">
+      <div class="detail-tags">
+        <span class="detail-badge">${badge}</span>
+        <span class="detail-stock ${soldOut ? "is-out" : ""}">${stockTxt}</span>
+      </div>
+      <span class="card-set">${p.set}</span>
+      <h3>${p.name}</h3>
+      <span class="card-cond">${p.condition}</span>
+      <p class="detail-desc">${p.description || ""}</p>
+      <div class="detail-price">${money(p.price)}</div>
+      ${btn}
+    </div>`;
+
+  const add = document.getElementById("detailAdd");
+  if (add) add.addEventListener("click", () => { addToCart(p.id); closeDetail(); });
+  $("#detailModal").classList.add("open");
+  $("#detailOverlay").classList.add("open");
+}
+function closeDetail() { $("#detailModal").classList.remove("open"); $("#detailOverlay").classList.remove("open"); }
+
 // ---------- Checkout ----------
 function qrURL(text) {
   return "https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=0&data=" + encodeURIComponent(text);
@@ -308,6 +386,13 @@ function wireEvents() {
   document.getElementById("checkoutBtn").addEventListener("click", () => { closeCart(); openCheckout(); });
   document.getElementById("closeCheckout").addEventListener("click", closeCheckout);
   document.getElementById("checkoutOverlay").addEventListener("click", closeCheckout);
+  document.getElementById("closeDetail").addEventListener("click", closeDetail);
+  document.getElementById("detailOverlay").addEventListener("click", closeDetail);
+
+  document.getElementById("search").addEventListener("input", (e) => {
+    searchQuery = e.target.value.trim().toLowerCase();
+    renderProducts();
+  });
 
   document.querySelectorAll("#filters .chip").forEach((chip) =>
     chip.addEventListener("click", () => {
@@ -319,7 +404,7 @@ function wireEvents() {
   );
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") { closeCart(); closeCheckout(); }
+    if (e.key === "Escape") { closeCart(); closeCheckout(); closeDetail(); }
   });
 }
 

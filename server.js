@@ -29,7 +29,25 @@ const STATIC = {
   "/index.html": { file: "index.html", type: "text/html; charset=utf-8" },
   "/styles.css": { file: "styles.css", type: "text/css; charset=utf-8" },
   "/app.js": { file: "app.js", type: "text/javascript; charset=utf-8" },
+  "/favicon.svg": { file: "favicon.svg", type: "image/svg+xml; charset=utf-8" },
+  "/og.png": { file: "og.png", type: "image/png" },
+  "/og.svg": { file: "og.svg", type: "image/svg+xml; charset=utf-8" },
 };
+
+// Product photos live in ./images. Drop a file named <product-id>.<ext> in there and it
+// automatically replaces that product's designed SVG — no code or products.json edits needed.
+const IMAGES_DIR = path.join(__dirname, "images");
+const IMAGE_TYPES = {
+  ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
+  ".webp": "image/webp", ".gif": "image/gif", ".avif": "image/avif",
+};
+
+// List image filenames currently sitting in ./images (empty array if the folder is missing).
+function listImages() {
+  try {
+    return fs.readdirSync(IMAGES_DIR).filter((f) => IMAGE_TYPES[path.extname(f).toLowerCase()]);
+  } catch { return []; }
+}
 
 function sendJSON(res, code, obj) {
   res.writeHead(code, { "Content-Type": "application/json; charset=utf-8" });
@@ -50,6 +68,19 @@ const server = http.createServer(async (req, res) => {
   if (req.method === "GET" && url === "/healthz") { res.writeHead(200); return res.end("ok"); }
   if (req.method === "GET" && url === "/api/config") return sendJSON(res, 200, storeConfig);
   if (req.method === "GET" && url === "/api/products") return sendJSON(res, 200, products);
+  if (req.method === "GET" && url === "/api/images") return sendJSON(res, 200, listImages());
+
+  // Serve product photos from ./images (e.g. /images/ascended-heroes-etb.jpg).
+  if (req.method === "GET" && url.startsWith("/images/")) {
+    const name = path.basename(decodeURIComponent(url.slice("/images/".length)));
+    const type = IMAGE_TYPES[path.extname(name).toLowerCase()];
+    if (!type) { res.writeHead(404); return res.end("Not found"); }
+    return fs.readFile(path.join(IMAGES_DIR, name), (err, buf) => {
+      if (err) { res.writeHead(404); return res.end("Not found"); }
+      res.writeHead(200, { "Content-Type": type, "Cache-Control": "public, max-age=3600" });
+      res.end(buf);
+    });
+  }
 
   if (req.method === "GET" && url.startsWith("/api/products/")) {
     const id = url.split("/").pop();

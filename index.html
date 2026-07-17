@@ -3,8 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PokéVault — Sealed Product & Graded Slabs</title>
-  <meta name="description" content="Premium sealed Pokémon product and graded slabs. Authenticated, climate-controlled, crypto checkout." />
+  <title>PokéVault — Sealed Pokémon Product & Graded Slabs</title>
+  <meta name="description" content="Premium sealed Pokémon product and graded slabs. Authenticated, climate-controlled, insured shipping, crypto checkout in BTC, USDT, USDC & SOL." />
+  <link rel="canonical" href="https://thetcgplug.org/" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+  <!-- Open Graph / social sharing -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="PokéVault" />
+  <meta property="og:title" content="PokéVault — Sealed Pokémon Product & Graded Slabs" />
+  <meta property="og:description" content="Authenticated, climate-controlled sealed boxes and graded slabs. Insured shipping, crypto checkout." />
+  <meta property="og:url" content="https://thetcgplug.org/" />
+  <meta property="og:image" content="https://thetcgplug.org/og.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="PokéVault — Sealed Pokémon Product & Graded Slabs" />
+  <meta name="twitter:description" content="Authenticated sealed boxes and graded slabs. Insured shipping, crypto checkout." />
+  <meta name="twitter:image" content="https://thetcgplug.org/og.png" />
+  <meta name="theme-color" content="#0a0b10" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -22,6 +41,7 @@
         <a href="#sealed">Sealed</a>
         <a href="#slabs">Graded Slabs</a>
         <a href="#trust">Why Us</a>
+        <a href="#faq">How It Works</a>
       </nav>
       <button class="cart-btn" id="cartBtn" aria-label="Open cart">
         Cart <span class="cart-count" id="cartCount">0</span>
@@ -51,13 +71,17 @@
     <section class="shop" id="shop">
       <div class="shop-head">
         <h2>The Vault</h2>
-        <div class="filters" id="filters">
-          <button class="chip active" data-filter="all">All</button>
-          <button class="chip" data-filter="sealed">Sealed</button>
-          <button class="chip" data-filter="slab">Graded Slabs</button>
+        <div class="shop-controls">
+          <input id="search" class="search" type="search" placeholder="Search sets, cards, grades…" aria-label="Search products" />
+          <div class="filters" id="filters">
+            <button class="chip active" data-filter="all">All</button>
+            <button class="chip" data-filter="sealed">Sealed</button>
+            <button class="chip" data-filter="slab">Graded Slabs</button>
+          </div>
         </div>
       </div>
       <div class="grid" id="productGrid"></div>
+      <p class="no-results" id="noResults" hidden>No products match your search.</p>
     </section>
 
     <section class="trust" id="trust">
@@ -85,6 +109,36 @@
         </div>
       </div>
     </section>
+
+    <section class="faq" id="faq">
+      <h2>How it works</h2>
+      <div class="faq-grid">
+        <details class="faq-item" open>
+          <summary>How do I pay with crypto?</summary>
+          <p>At checkout, pick a coin (BTC, USDT, USDC, or SOL). We show a wallet address and a QR code. Send the exact USD value in that coin from your own wallet or exchange, then click “I've sent payment.” You'll get a reference number instantly.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Which coins and networks do you accept?</summary>
+          <p>Bitcoin (BTC), Tether (USDT, ERC-20), USD Coin (USDC, ERC-20), and Solana (SOL). Always send USDT and USDC on the <strong>ERC-20</strong> network — sending on the wrong network can lose your funds.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What happens after I pay?</summary>
+          <p>We confirm the transaction on-chain (usually within a few hours), then email a tracking number to the address you provide. Nothing ships until payment is verified.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Is everything authentic?</summary>
+          <p>Yes. Graded slabs come sealed from PSA or CGC. Sealed product is verified case-fresh — never searched, weighed, or resealed. High-value items ship fully insured and signature-required.</p>
+        </details>
+        <details class="faq-item">
+          <summary>How is my order shipped?</summary>
+          <p>Fully insured, tracked, and discreetly packaged from a smoke-free, climate-controlled vault. High-value slabs require a signature on delivery.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I get a refund?</summary>
+          <p>Because crypto payments are final, we don't offer change-of-mind refunds. If an item arrives damaged or not as described, contact us and we'll make it right.</p>
+        </details>
+      </div>
+    </section>
   </main>
 
   <footer class="footer">
@@ -108,6 +162,14 @@
       <button class="btn btn-primary btn-block" id="checkoutBtn" disabled>Checkout with crypto</button>
     </div>
   </aside>
+
+  <!-- Product detail modal -->
+  <div class="modal-overlay" id="detailOverlay">
+    <div class="modal product-modal" id="detailModal" role="dialog" aria-modal="true">
+      <button class="icon-btn modal-close" id="closeDetail" aria-label="Close">✕</button>
+      <div id="detailContent"></div>
+    </div>
+  </div>
 
   <!-- Checkout modal -->
   <div class="modal-overlay" id="checkoutOverlay">

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#10121b"/>
+      <stop offset="1" stop-color="#0a0b10"/>
+    </linearGradient>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7b61ff"/>
+      <stop offset="0.6" stop-color="#3aa9ff"/>
+      <stop offset="1" stop-color="#f4c542"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="30%" cy="10%" r="70%">
+      <stop offset="0" stop-color="#7b61ff" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#7b61ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <g transform="translate(90,150)">
+    <path d="M40 0 L80 44 L40 88 L0 44 Z" fill="url(#brand)"/>
+    <circle cx="40" cy="44" r="15" fill="#0a0b10"/>
+    <circle cx="40" cy="44" r="6" fill="url(#brand)"/>
+    <text x="110" y="62" font-family="Sora, Arial, sans-serif" font-weight="800" font-size="58" fill="#eef0f7">PokéVault</text>
+  </g>
+  <text x="90" y="360" font-family="Sora, Arial, sans-serif" font-weight="800" font-size="72" fill="#eef0f7">Sealed grails &amp; graded slabs,</text>
+  <text x="90" y="440" font-family="Sora, Arial, sans-serif" font-weight="800" font-size="72" fill="url(#brand)">vaulted and verified.</text>
+  <text x="92" y="512" font-family="Inter, Arial, sans-serif" font-weight="500" font-size="30" fill="#99a0b8">Authenticated · Climate-controlled · Pay in BTC · USDT · USDC · SOL</text>
+</svg>
